@@ -10,18 +10,18 @@ class Snap::Author
         @name = author.name 
         @link = author.link
         @books = []
-        get_attributes # If searched for by name, a different api call needs to be made to get other info
+        attributes = get_attributes # If searched for by name, a different api call needs to be made to get other info
+        set_attributes(attributes)
     end 
 
     def get_attributes
-        Snap::Api.author_info(self)
+        Snap::Api.author_info(self.id)
     end
 
     def set_attributes(attributes)
-        works_count = attributes.works_count
-        about = attributes.about
-        books = attributes.books.book
-        self.books = books
+        self.works_count = attributes.works_count
+        self.about = attributes.about
+        self.books = attributes.books.book
     end
 
     def books=(books)
@@ -41,5 +41,9 @@ class Snap::Author
             book.author = self
             @books << book
         end
+    end
+
+    def add_to_favorites
+        @@fave_authors << self
     end
 end

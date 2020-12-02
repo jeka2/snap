@@ -7,14 +7,11 @@ CLIENT = Goodreads.new(api_key: KEY)
 
 class Snap::Api
     def self.books_by_author(author_name)
-        author_info = CLIENT.author_by_name(author_name)
-        author = Snap::Author.new(author_info)
-        puts author.name
+        CLIENT.author_by_name(author_name)
     end
 
-    def self.author_info(author)
-        author_info = CLIENT.author(author.id)
-        author.set_attributes(author_info)
+    def self.author_info(author_id)
+        CLIENT.author(author_id)
     end
 
     def self.books_by_name(name)

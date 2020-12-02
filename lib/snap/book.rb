@@ -1,12 +1,22 @@
 require 'pry'
 
 class Snap::Book
+   
+    attr_accessor :title, :author, :id, :isbn, :num_pages, :link, :publisher, :rating, :ratings_count, :description
 
-    attr_accessor :name, :author
-
+    @@fave_books = [] # A user can add a favorite book that persist for the duration of the runtime
+    
     def initialize(name = nil, book = nil)
         if book 
-            
+            @id = book[:id]
+            @isbn = book[:isbn]
+            @title = book[:title]
+            @num_pages = book[:num_pages]
+            @link = book[:link]
+            @publisher = book[:publisher]
+            @rating = book[:rating]
+            @ratings_count = book[:ratings_count]
+            @description = book[:description]
         else
             @name = name
         end
@@ -17,11 +27,13 @@ class Snap::Book
     end
 end
 
-
-
-        # uri = URI('https://www.goodreads.com/search/index.xml')
-        # params = { q: "9780345015339", key: KEY, page: 1 }
-        # uri.query = URI.encode_www_form(params)
-        
-        # res = Net::HTTP.get_response(uri)
-        # noko = Nokogiri.XML(res.body, nil, nil, Nokogiri::XML::ParseOptions.new((1 << 0) | (1 << 1)))
+# attributes = {}
+#             attributes[:id] = book.id
+#             attributes[:isbn] = book.isbn
+#             attributes[:title] = book.title
+#             attributes[:num_pages] = book.num_pages
+#             attributes[:link] = book.link
+#             attributes[:publisher] = book.publisher
+#             attributes[:rating] = book.average_rating
+#             attributes[:ratings_count] = book.ratings_count 
+#             attributes[:description] = book.description
