@@ -7,11 +7,19 @@ class Snap::CLI
     end
 
     def list_info
-        puts <<-DOC
-            1. Stuff
-            2. More Stuff
-            3. Even More Stuff
-        DOC
+        choice = nil
+        while choice != "exit"
+            puts "Please select how you would like to search"
+            puts "1. Bring up books by an author."
+            puts "2. Search for books by name"
+            choice = gets.chomp
+
+            if choice == "1"
+                Snap::Api.books_by_author('james')
+            elsif choice == "2"
+                Snap::Api.books_by_name('lord')
+            end
+        end
     end
 
     def menu 
