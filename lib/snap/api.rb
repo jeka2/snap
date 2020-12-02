@@ -13,7 +13,8 @@ class Snap::Api
     end
 
     def self.author_info(author)
-
+        author_info = CLIENT.author(author.id)
+        author.set_attributes(author_info)
     end
 
     def self.books_by_name(name)

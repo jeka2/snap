@@ -1,6 +1,17 @@
 require 'pry'
 
 class Snap::Book
+
+    attr_accessor :name, :author
+
+    def initialize(name = nil, book = nil)
+        if book 
+            
+        else
+            @name = name
+        end
+    end
+
     def self.get_book
 
     end
