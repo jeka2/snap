@@ -26,8 +26,8 @@ class Snap::Book
         @@fave_books << self
     end
 
-    def self.get_book
-
+    def self.fave_books
+        @@fave_books
     end
 end
 

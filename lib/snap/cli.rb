@@ -31,10 +31,10 @@ class Snap::CLI
             display_books(author.books)
         elsif choice == "2" #By book name
             Snap::Api.books_by_name('lord')
-        elsif choice == "3"
-
-        elsif choice == "4"
-
+        elsif choice == "3" # Show favorite author(s)
+            display_favorite_authors
+        elsif choice == "4" # Show favorite book(s)
+            display_favorite_books
         end
 
         if choice == "1" || choice == "2"
@@ -65,7 +65,26 @@ class Snap::CLI
         selection
     end
 
-    def detailed_info(book)
+    def display_favorite_authors
+        Snap::Author.fave_authors.each do |author| # scrolling through each favorite author object
+            gender_pronoun = author.gender_pronoun
+            print "#{author.name} and some of #{gender_pronoun} material: "
+            author.books.each_with_index do |book, i| # scrolling though each of the author's books
+                print "\n" if i % 2 == 0
+                print "#{i+1}. #{book.title}\t\t"
+            end
+            print "\n"
+        end
+    end
+
+    def display_favorite_books
+        Snap::Book.fave_books.each do |book|
+            binding.pry
+            puts "#{book.title}"
+        end
+    end
+
+    def detailed_info(book) # Detailed info displayes the full description along with some other attributes
         print_info(book, nil, true)
         book.author.add_to_favorites if favorite?("author") 
         book.add_to_favorites if favorite?("book")
@@ -91,20 +110,19 @@ class Snap::CLI
         puts "Please select the option you want - (type 'exit' to quit)"
         puts "1. Bring up books by an author."
         puts "2. Search for books by name."
-        puts "3. View my favorite authors."
+        puts "3. View my favorite authors and some of their works."
         puts "4. View my favorite books."
     end
 
     def print_info(book, index = nil, full = false)
         truncate_amount = full ? 5000 : 300 # show full description if closer detail or truncated if partial
         index = index == nil ?  '' : "#{index + 1}. "
+        isbn = book.isbn == nil ? "N/A" : book.isbn
         puts "#{index}Title - #{book.title}\n\nAuthor - #{book.author.name}\n\n"
         puts "Description - \n#{book.description.gsub(/<.*>/, ' ').truncate(truncate_amount)}\n\n" #gsub first because some tags fall through the cracks at the end otherwise
         puts "Rating - #{book.rating} Rating Count - #{book.ratings_count}\n\n"
         puts "Goodreads Link - #{book.link}\n\n"
-        if full 
-            puts "ISBN - #{book.isbn}  Number of pages - #{book.num_pages}"
-        end
+        puts "ISBN - #{isbn}  Number of pages - #{book.num_pages}" if full
         puts "Publisher - #{book.publisher}\n"
         puts "----------------------------------------------------------------------------------------------------------\n\n"
     end
