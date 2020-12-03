@@ -5,7 +5,7 @@ class Snap::Book
     attr_accessor :title, :author, :id, :isbn, :num_pages, :link, :publisher, :rating, :ratings_count, :description
 
     @@fave_books = [] # A user can add a favorite book that persist for the duration of the runtime
-    
+
     def initialize(name = nil, book = nil)
         if book 
             @id = book[:id]
@@ -20,6 +20,10 @@ class Snap::Book
         else
             @name = name
         end
+    end
+
+    def add_to_favorites
+        @@fave_books << self
     end
 
     def self.get_book
