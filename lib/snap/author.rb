@@ -9,7 +9,6 @@ class Snap::Author
         @id = author.id
         @name = author.name 
         @link = author.link
-        @gender = author.gender
         @books = []
         attributes = get_attributes # If searched for by name, a different api call needs to be made to get other info
         set_attributes(attributes)
@@ -20,6 +19,7 @@ class Snap::Author
     end
 
     def set_attributes(attributes)
+        @gender = attributes.gender
         self.works_count = attributes.works_count
         self.about = attributes.about
         self.books = attributes.books.book
@@ -51,12 +51,12 @@ class Snap::Author
         elsif self.gender == "female"
             pronoun = "her"
         else
-            pronoun = "his/her" # Sometimes the gender isn't provided by the API
+            pronoun = "his/her" # Just in case the gender isn't provided for whatever reason
         end
     end
 
     def add_to_favorites
-        @@fave_authors << self
+        @@fave_authors << self unless @@fave_authors.include?(self)
     end
 
     def self.fave_authors

@@ -23,7 +23,7 @@ class Snap::Book
     end
 
     def add_to_favorites
-        @@fave_books << self
+        @@fave_books << self unless @@fave_books.include?(self)
     end
 
     def self.fave_books

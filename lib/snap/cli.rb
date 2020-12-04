@@ -6,9 +6,9 @@ class Snap::CLI
 
     def list_info
         choice = nil
-        while choice != "exit"
-            greeting
-            choice = self.options
+        while choice != "exit" # main loop
+            main_prompt
+            choice = self.select_option
         end
     end
 
@@ -22,10 +22,11 @@ class Snap::CLI
         @number_of_titles = number_of_titles
     end
 
-    def options 
+    def select_option 
         choice = gets.chomp
 
         if choice == "1" # By author name
+            #search_param = query_api_by_choice(choice)
             author_info = Snap::Api.books_by_author('j')
             author = Snap::Author.new(author_info)
             display_books(author.books)
@@ -35,13 +36,46 @@ class Snap::CLI
             display_favorite_authors
         elsif choice == "4" # Show favorite book(s)
             display_favorite_books
+        elsif choice != "exit"
+            puts "Please pick from the selection or type 'exit' to quit."
         end
 
         if choice == "1" || choice == "2"
+            #display_books(author.books) # The results will be displayed here for choices 1 or 2
             selection = more_details?(@number_of_titles) # Gives user the option to look at a title in more detail
             detailed_info(author.books[selection]) if selection
         end
         choice
+    end
+
+    def query_api_by_choice(choice)
+        valid_answer = false
+        while !valid_answer
+            valid_answer = true
+            if choice == '1'
+                puts "Enter the name of the author: "
+                name = gets.chomp
+                begin
+                    author_info = Snap::Api.books_by_author(name)
+                    create_author_and_their_books(author_info)
+                rescue => e # The rescue is only needed to prevent a crash. The loop should keep going if the user entered something that returns an error from the api
+                    valid_answer = false
+                end
+            elsif choice == '2'
+                puts "Enter the title of the book: "
+                title = gets.chomp
+                begin 
+                    book_info = Snap::Api.books_by_name(title)
+                    
+                rescue => e
+                    valid_answer = false
+                end
+            end
+        end
+    end
+
+    def create_author_and_their_books(author_info)
+        author = Snap::Author.new(author_info)
     end
 
     def more_details?(number_of_titles)
@@ -58,7 +92,7 @@ class Snap::CLI
                 else
                     puts "The number must correspond to one of the titles."
                 end 
-            else
+            elsif choice != "exit"
                 puts "The choice must be a number corresponding to the title."
             end
         end 
@@ -73,18 +107,17 @@ class Snap::CLI
                 print "\n" if i % 2 == 0
                 print "#{i+1}. #{book.title}\t\t"
             end
-            print "\n"
+            puts "\nAbout author: \n#{author.about.gsub(/<.*>/, ' ')}\n"
         end
     end
 
     def display_favorite_books
         Snap::Book.fave_books.each do |book|
-            binding.pry
-            puts "#{book.title}"
+            puts "#{book.title}\n"
         end
     end
 
-    def detailed_info(book) # Detailed info displayes the full description along with some other attributes
+    def detailed_info(book) # displays the full description along with some other attributes for a single book
         print_info(book, nil, true)
         book.author.add_to_favorites if favorite?("author") 
         book.add_to_favorites if favorite?("book")
@@ -106,7 +139,7 @@ class Snap::CLI
 
     private
 
-    def greeting
+    def main_prompt
         puts "Please select the option you want - (type 'exit' to quit)"
         puts "1. Bring up books by an author."
         puts "2. Search for books by name."
@@ -122,8 +155,8 @@ class Snap::CLI
         puts "Description - \n#{book.description.gsub(/<.*>/, ' ').truncate(truncate_amount)}\n\n" #gsub first because some tags fall through the cracks at the end otherwise
         puts "Rating - #{book.rating} Rating Count - #{book.ratings_count}\n\n"
         puts "Goodreads Link - #{book.link}\n\n"
-        puts "ISBN - #{isbn}  Number of pages - #{book.num_pages}" if full
-        puts "Publisher - #{book.publisher}\n"
+        puts "ISBN - #{isbn}  Number of pages - #{book.num_pages}"
+        puts "Publisher - #{book.publisher}\n" if book.publisher
         puts "----------------------------------------------------------------------------------------------------------\n\n"
     end
 
