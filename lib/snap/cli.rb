@@ -36,10 +36,16 @@ class Snap::CLI
             puts "Please pick from the selection or type 'exit' to quit."
         end
 
+        print "\n\n"
+
         if books_to_display
-            display_books(books_to_display) # The results will be displayed here for choices 1 or 2
-            selection = more_details?(@number_of_titles) # Gives user the option to look at a title in more detail
-            detailed_info(books_to_display[selection]) if selection
+            if books_to_display.size == 1 # If there was only a single result, show the full details of the book
+                detailed_info(books_to_display[0])
+            else
+                display_books(books_to_display)
+                selection = more_details?(@number_of_titles) # Gives user the option to look at a title in more detail
+                detailed_info(books_to_display[selection]) if selection
+            end
         end
         choice
     end
@@ -66,9 +72,8 @@ class Snap::CLI
                 title = gets.chomp
                 begin 
                     books_list = Snap::Api.books_by_title(title)
-                    books_to_display = create_authors_and_their_books(books_list, 'book')
+                    books_to_display = create_authors_and_their_books(books_list, 'book') 
                 rescue => e
-                    puts e
                     puts "The title you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
                 end
@@ -78,14 +83,16 @@ class Snap::CLI
     end
 
     def create_authors_and_their_books(api_info, search_type)
+        raise "Wrong #{search_type} entered. " if api_info == {} # If api_info is an empty hash, the information the user entered is off, and no further action should be taken this loop
+
         book_list = nil
         if search_type == "author"
-            author = Snap::Author.new(api_info)
+            author = Snap::Author.find_or_create(api_info)
             book_list = author.books
         elsif search_type == "book"
-            book_list = Snap::Book.new(api_info)
+            book_list = Snap::Book.find_or_create(api_info)
         end
-        book_list
+        Array(book_list) # Forces a conversion to an array
     end
 
     def more_details?(number_of_titles)
