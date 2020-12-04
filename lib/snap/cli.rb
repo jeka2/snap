@@ -24,14 +24,10 @@ class Snap::CLI
 
     def select_option 
         choice = gets.chomp
+        books_to_display = nil
 
-        if choice == "1" # By author name
-            #search_param = query_api_by_choice(choice)
-            author_info = Snap::Api.books_by_author('j')
-            author = Snap::Author.new(author_info)
-            display_books(author.books)
-        elsif choice == "2" #By book name
-            Snap::Api.books_by_name('lord')
+        if choice == "1" || choice == "2" # Search by author name or book title
+            books_to_display = query_api_by_choice(choice)
         elsif choice == "3" # Show favorite author(s)
             display_favorite_authors
         elsif choice == "4" # Show favorite book(s)
@@ -40,42 +36,56 @@ class Snap::CLI
             puts "Please pick from the selection or type 'exit' to quit."
         end
 
-        if choice == "1" || choice == "2"
-            #display_books(author.books) # The results will be displayed here for choices 1 or 2
+        if books_to_display
+            display_books(books_to_display) # The results will be displayed here for choices 1 or 2
             selection = more_details?(@number_of_titles) # Gives user the option to look at a title in more detail
-            detailed_info(author.books[selection]) if selection
+            detailed_info(books_to_display[selection]) if selection
         end
         choice
     end
 
     def query_api_by_choice(choice)
         valid_answer = false
+        books_to_display = nil
+
         while !valid_answer
             valid_answer = true
+
             if choice == '1'
                 puts "Enter the name of the author: "
                 name = gets.chomp
                 begin
                     author_info = Snap::Api.books_by_author(name)
-                    create_author_and_their_books(author_info)
-                rescue => e # The rescue is only needed to prevent a crash. The loop should keep going if the user entered something that returns an error from the api
+                    books_to_display = create_authors_and_their_books(author_info, 'author')
+                rescue => e # If an error occurs, the loop will continue
+                    puts "The name you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
                 end
             elsif choice == '2'
                 puts "Enter the title of the book: "
                 title = gets.chomp
                 begin 
-                    book_info = Snap::Api.books_by_name(title)
-                    
+                    books_list = Snap::Api.books_by_title(title)
+                    books_to_display = create_authors_and_their_books(books_list, 'book')
                 rescue => e
+                    puts e
+                    puts "The title you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
                 end
             end
         end
+        books_to_display
     end
 
-    def create_author_and_their_books(author_info)
-        author = Snap::Author.new(author_info)
+    def create_authors_and_their_books(api_info, search_type)
+        book_list = nil
+        if search_type == "author"
+            author = Snap::Author.new(api_info)
+            book_list = author.books
+        elsif search_type == "book"
+            book_list = Snap::Book.new(api_info)
+        end
+        book_list
     end
 
     def more_details?(number_of_titles)
@@ -102,12 +112,12 @@ class Snap::CLI
     def display_favorite_authors
         Snap::Author.fave_authors.each do |author| # scrolling through each favorite author object
             gender_pronoun = author.gender_pronoun
-            print "#{author.name} and some of #{gender_pronoun} material: "
+            print "\n#{author.name} and some of #{gender_pronoun} material: "
             author.books.each_with_index do |book, i| # scrolling though each of the author's books
                 print "\n" if i % 2 == 0
                 print "#{i+1}. #{book.title}\t\t"
             end
-            puts "\nAbout author: \n#{author.about.gsub(/<.*>/, ' ')}\n"
+            puts "\nAbout author: \n#{author.about.gsub(/<.*>/, ' ')}\n\n"
         end
     end
 
@@ -115,6 +125,7 @@ class Snap::CLI
         Snap::Book.fave_books.each do |book|
             puts "#{book.title}\n"
         end
+        print "\n\n"
     end
 
     def detailed_info(book) # displays the full description along with some other attributes for a single book
@@ -152,7 +163,7 @@ class Snap::CLI
         index = index == nil ?  '' : "#{index + 1}. "
         isbn = book.isbn == nil ? "N/A" : book.isbn
         puts "#{index}Title - #{book.title}\n\nAuthor - #{book.author.name}\n\n"
-        puts "Description - \n#{book.description.gsub(/<.*>/, ' ').truncate(truncate_amount)}\n\n" #gsub first because some tags fall through the cracks at the end otherwise
+        puts "Description - \n#{book.description.gsub(/<.*>/, ' ').truncate(truncate_amount)}\n\n" if book.description #gsub first because some tags fall through the cracks at the end otherwise
         puts "Rating - #{book.rating} Rating Count - #{book.ratings_count}\n\n"
         puts "Goodreads Link - #{book.link}\n\n"
         puts "ISBN - #{isbn}  Number of pages - #{book.num_pages}"

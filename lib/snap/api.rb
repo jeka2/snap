@@ -10,8 +10,8 @@ class Snap::Api
         client.author(author_id)
     end
 
-    def self.books_by_name(name)
-        puts 'books by name'
+    def self.books_by_title(title)
+        client.book_by_title(title)
     end
 
     def self.client

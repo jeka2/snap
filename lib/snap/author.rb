@@ -38,7 +38,7 @@ class Snap::Author
             attributes[:ratings_count] = book.ratings_count 
             attributes[:description] = book.description
 
-            book = Snap::Book.new(nil, attributes)
+            book = Snap::Book.new(attributes, true)
             book.author = self
             @books << book
         end
