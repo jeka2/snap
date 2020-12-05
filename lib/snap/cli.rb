@@ -71,8 +71,8 @@ class Snap::CLI
                 puts "Enter the title of the book: "
                 title = gets.chomp
                 begin 
-                    books_list = Snap::Api.books_by_title(title)
-                    books_to_display = create_authors_and_their_books(books_list, 'book') 
+                    book_info = Snap::Api.books_by_title(title)
+                    books_to_display = create_authors_and_their_books(book_info, 'book') 
                 rescue => e
                     puts "The title you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
@@ -83,7 +83,7 @@ class Snap::CLI
     end
 
     def create_authors_and_their_books(api_info, search_type)
-        raise "Wrong #{search_type} entered. " if api_info == {} # If api_info is an empty hash, the information the user entered is off, and no further action should be taken this loop
+        raise "Wrong #{search_type} name entered. " if api_info == {} # If api_info is an empty hash, the information the user entered is off, and no further action should be taken this loop
 
         book_list = nil
         if search_type == "author"
@@ -92,7 +92,7 @@ class Snap::CLI
         elsif search_type == "book"
             book_list = Snap::Book.find_or_create(api_info)
         end
-        Array(book_list) # Forces a conversion to an array
+        Array(book_list) # Forces an encompassing by array
     end
 
     def more_details?(number_of_titles)
@@ -159,8 +159,8 @@ class Snap::CLI
 
     def main_prompt
         puts "Please select the option you want - (type 'exit' to quit)"
-        puts "1. Bring up books by an author."
-        puts "2. Search for books by name."
+        puts "1. Search for books by author's name."
+        puts "2. Search for books by title."
         puts "3. View my favorite authors and some of their works."
         puts "4. View my favorite books."
     end
@@ -168,12 +168,12 @@ class Snap::CLI
     def print_info(book, index = nil, full = false)
         truncate_amount = full ? 5000 : 300 # show full description if closer detail or truncated if partial
         index = index == nil ?  '' : "#{index + 1}. "
-        isbn = book.isbn == nil ? "N/A" : book.isbn
+        isbn = (book.isbn == nil || book.isbn == '') ? "N/A" : book.isbn
         puts "#{index}Title - #{book.title}\n\nAuthor - #{book.author.name}\n\n"
         puts "Description - \n#{book.description.gsub(/<.*>/, ' ').truncate(truncate_amount)}\n\n" if book.description #gsub first because some tags fall through the cracks at the end otherwise
         puts "Rating - #{book.rating} Rating Count - #{book.ratings_count}\n\n"
         puts "Goodreads Link - #{book.link}\n\n"
-        puts "ISBN - #{isbn}  Number of pages - #{book.num_pages}"
+        puts "ISBN - #{isbn} Number of pages - #{book.num_pages}"
         puts "Publisher - #{book.publisher}\n" if book.publisher
         puts "----------------------------------------------------------------------------------------------------------\n\n"
     end
@@ -182,15 +182,3 @@ class Snap::CLI
         true if Float(string) rescue false
     end
 end
-
-# @id=136251,
-#       @isbn="0545010225",
-#       @link="https://www.goodreads.com/book/show/136251.Harry_Potter_and_the_Deathly_Hallows",
-#       @num_pages="759",
-#       @publisher="Arthur A. Levine Books / Scholastic Inc.",
-#       @rating="4.62",
-#       @ratings_count="2833444",
-#       @title="Harry Potter and the Deathly Hallows (Harry Potter, #7)">,
-#      #<Snap::Book:0x0000560645fa32b8
-#       @author=#<Snap::Author:0x00005606460b6b28 ...>,
-#       @description=

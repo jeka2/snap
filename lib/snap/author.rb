@@ -36,22 +36,9 @@ class Snap::Author
 
     def books=(books)
         books.each do |book|
-            next if Snap::Book.book_already_exists?(book.id) # No reason to create a new Book object if the title already exists
-
-            attributes = {}
-            attributes[:id] = book.id
-            attributes[:isbn] = book.isbn
-            attributes[:title] = book.title
-            attributes[:num_pages] = book.num_pages
-            attributes[:link] = book.link
-            attributes[:publisher] = book.publisher
-            attributes[:rating] = book.average_rating
-            attributes[:ratings_count] = book.ratings_count 
-            attributes[:description] = book.description
-
-            book = Snap::Book.new(attributes, true)
+            book = Snap::Book.find_or_create(book)
             book.author = self
-            @books << book
+            @books << book unless @books.include?(book)
         end
     end
 
