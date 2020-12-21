@@ -15,8 +15,8 @@ class Snap::Api
     end
 
     def self.client
-        key = "T5jCRWzUGCZkMLVcFhO0w"
-        secret = "E0W0bdU4o4cGP0C3tYpRVl5njXZhC1VU3RIcurNG0o"
+        key = ENV["GOODREADS_API_KEY"]
+        secret = ENV["GOODREADS_API_SECRET"]
         Goodreads.new(api_key: key)
     end
 

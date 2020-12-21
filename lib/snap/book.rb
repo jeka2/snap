@@ -7,19 +7,16 @@ class Snap::Book
     @@all = []
     @@fave_books = [] # A user can add a favorite book that persist for the duration of the runtime
 
-    def initialize(attributes, author_set = false)
-        @id = attributes[:id].to_i
-        @isbn = attributes[:isbn]
-        @title = attributes[:title]
-        @num_pages = attributes[:num_pages]
-        @link = attributes[:link]
-        @publisher = attributes[:publisher]
-        @rating = attributes[:rating]
-        @ratings_count = attributes[:ratings_count]
-        @description = attributes[:description]
+    def initialize(args, author_set = false)
+        @id = args.delete("id").to_i
+
+        args.each do |k, v| 
+            self.send("#{k}=", v) if respond_to?(k) # There will be more arguments than we need, so we only want to grab the ones defined
+        end
+
         @@all << self
         
-        set_author(attributes[:authors][:author]) if !author_set # Author will not be initially set if user looked up by book
+        set_author(args[:authors][:author]) if !author_set # Author will not be initially set if user looked up by book
     end
 
     def set_author(authors) 
@@ -37,7 +34,6 @@ class Snap::Book
     end
 
     def self.find_or_create(attributes)
-        ### LSDFJLSKDJFDSKFJLJFDSLKJKDSJ:FSLDKF
         book = self.book_already_exists?(attributes.id)
         book = self.new(attributes) if !book
         book

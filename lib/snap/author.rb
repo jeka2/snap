@@ -1,5 +1,4 @@
 class Snap::Author
-
     attr_accessor :name, :works_count, :about
     attr_reader :id, :books, :gender, :link
 
@@ -7,10 +6,10 @@ class Snap::Author
     @@fave_authors = [] # A user can add a favorite author
 
     def initialize(author_info, full_info_provided = false) # If searched for by name, most of the info will be missing, so another api call needs to be made
+        @books = []
         @id = author_info.id
         @name = author_info.name 
         @link = author_info.link
-        @books = []
         @@all << self
         if full_info_provided
             @gender = author_info.gender
