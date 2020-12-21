@@ -64,7 +64,6 @@ class Snap::CLI
                     author_info = Snap::Api.books_by_author(name)
                     books_to_display = create_authors_and_their_books(author_info, 'author')
                 rescue => e # If an error occurs, the loop will continue
-                    puts e
                     puts "The name you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
                 end
@@ -75,7 +74,6 @@ class Snap::CLI
                     book_info = Snap::Api.books_by_title(title)
                     books_to_display = create_authors_and_their_books(book_info, 'book') 
                 rescue => e
-                    puts e
                     puts "The title you entered doesn't match our data. Please try again.\n"
                     valid_answer = false
                 end
